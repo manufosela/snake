@@ -1,0 +1,84 @@
+*, ::after, ::before {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #123;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#botonera, #points {
+  margin: 10px 0;
+}
+#botonera *, #points * {
+  margin:5px;
+}
+label {
+  color: #FFF;
+}
+#points {
+  border: 0;
+  background: transparent;
+  color: #FFF;
+  font-size: 2rem;
+  width: 80px;
+  text-align: right;
+}
+
+.ModalLayer-modal::part(modal) {
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  width:100%;
+  height:100%;
+}
+.ModalLayer-modal::part(button) {
+  font-size:2rem;
+}
+
+.shadow-wall {
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wall {
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  z-index:1;
+  background: url('wall.jpeg');
+}
+
+.board-layer {
+  border: 1px solid #555;
+  background:#999;
+  width: var(--board-size);
+  height: var(--board-size);
+  display:grid;
+  grid-template-columns: repeat(var(--num-cells), 1fr);
+  grid-template-rows: repeat(var(--num-cells), 1fr);
+  grid-gap: 0;
+  margin:0;
+  padding:0;
+  z-index:2;
+}
+
+.snake {
+  background-color:#123;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  z-index:5;
+}
+.head {
+  background-color:#832;
+  z-index: 10;
+}
+
+.dot {
+  background-color:#595;
+  width: var(--cell-size);
+  height: var(--cell-size);
+}
