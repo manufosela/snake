@@ -1,6 +1,6 @@
 {
   "name": "serpiente",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Juego de la serpiente",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,7 @@
   "author": "manufosela",
   "license": "Apache-2.0",
   "dependencies": {
+    "animation-explosion": "^1.0.1",
     "vanilla-modal-layer": "^1.2.4"
   },
   "devDependencies": {

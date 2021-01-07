@@ -18,7 +18,7 @@ body {
 label {
   color: #FFF;
 }
-#points {
+.points {
   border: 0;
   background: transparent;
   color: #FFF;
@@ -29,6 +29,7 @@ label {
 
 .ModalLayer-modal::part(modal) {
   display:flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width:100%;
@@ -52,9 +53,15 @@ label {
   background: url('wall.jpeg');
 }
 
+animation-explosion {
+  position: relative;
+  top: -50px;
+  left: -50px;
+}
+
 .board-layer {
   border: 1px solid #555;
-  background:#999;
+  background:#DDD;
   width: var(--board-size);
   height: var(--board-size);
   display:grid;
@@ -77,7 +84,7 @@ label {
   z-index: 10;
 }
 
-.dot {
+.apple {
   background-color:#595;
   width: var(--cell-size);
   height: var(--cell-size);
