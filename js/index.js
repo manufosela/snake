@@ -169,33 +169,21 @@ function manageCollision() {
   console.log("collision!!");
 }
 
-function cleanChangeDirection() {
-  if (changeDir === 'dirty') {
-    const setOrientations = [...snakeGroup.reduce((acum, elem) => {
-      acum.add(elem.dataset.orientation);
-      return acum;
-    }, new Set())];
-    if (setOrientations.length === 1) {
-      console.log('clean change dir');
-      changeDir = 'clean';
-      changeDirPosition = {};
-    } 
-  }
-}
-
 function movesnake() {
   snakeGroup.forEach((snakeCell) => {
     const col = snakeCell.dataset.col;
     const row = snakeCell.dataset.row;
     if (changeDirPosition[`${col}-${row}`] !== undefined) {
       snakeCell.dataset.orientation = changeDirPosition[`${col}-${row}`];
-      changeDir = 'dirty';
+    }
+    if (parseInt(snakeCell.dataset.id) === (size - 1)) { 
+      console.log('clean change dir');
+      changeDirPosition[`${col}-${row}`] = undefined; 
     }
     const cellOrientation = snakeCell.dataset.orientation;
     snakeCell.dataset.col = parseInt(snakeCell.dataset.col) + dirX[cellOrientation];
     snakeCell.dataset.row = parseInt(snakeCell.dataset.row) + dirY[cellOrientation];
   });
-  cleanChangeDirection();
 
   steps += 1;
   const x = tailHead.dataset.col;
