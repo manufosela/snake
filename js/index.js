@@ -2,17 +2,42 @@ import { ModalLayer } from 'vanilla-modal-layer';
 import 'animation-explosion';
 
 function init() {
+  getBoardHTMLObjects();
   drawSnakeAndElements();
-  snakeGroup = [...document.querySelectorAll('.snake')];
+  updateSnakeData();
+  fixPositionSnake();
+  fixPositionApples();
+  addBoardStyles();
+  showPoints();
+  getBoardHTMLObjects();
+  modalToStartGame(getPhaseMessage());
+  window.addEventListener("keydown", changeOrientation);
+}
+
+function getBoardHTMLObjects() {
+  boardLayer = document.querySelector(".board-layer");
+  tailHead = document.querySelector('[data-id="0"]');
+  pointsLayer = document.getElementById('points');
+  phasePointsLayer = document.getElementById('phasePoints');
+  totalPointsLayer = document.getElementById('totalPoints');
+}
+
+function getPhaseMessage() {
+  return phaseMessage[phase].map(msg => `<p>${msg}</p>`).join('');
+}
+
+function fixPositionSnake() {
   snakeGroup.forEach((snakeCell) => {
     fixPosition(snakeCell);
   });
+}
+
+function fixPositionApples() {
   apple = document.querySelector('.apple');
   fixPosition(apple);
-  const message = phaseMessage[phase].map(msg => `<p>${msg}</p>`).join('');
-  modalToStartGame(message);
-  showPoints();
+}
 
+function addBoardStyles() {
   const style = document.createElement('style');
   style.innerHTML = `
     body { --board-size: ${boardSize}px; --num-cells: ${numCells}; --cell-size: ${cellSize}; }
@@ -20,14 +45,6 @@ function init() {
     .wall { width: ${boardSize + cellSize*4}px; height: ${boardSize + cellSize*4}px; }
   `;
   document.head.appendChild(style);
-
-  boardLayer = document.querySelector(".board-layer");
-  tailHead = document.querySelector('[data-id="0"]');
-  pointsLayer = document.getElementById('points');
-  phasePointsLayer = document.getElementById('phasePoints');
-  totalPointsLayer = document.getElementById('totalPoints');
-
-  window.addEventListener("keydown", changeOrientation);
 }
 
 function drawSnakeAndElements() {
@@ -88,7 +105,6 @@ function changeOrientation(ev) {
   const headOrientation = tailHead.dataset.orientation;
   if (notAllowedOrientation[headOrientation] != tailOrientation[key]) {
     console.log(key);
-    steps = 0;
     changeDirPosition[`${tailHead.dataset.col}-${tailHead.dataset.row}`] = tailOrientation[key];
   }
 }
@@ -115,21 +131,30 @@ function fixPosition(element) {
   element.style.gridRow = element.dataset.row;
 }
 
-function growUp() {
-  const tail = document.querySelector(`[data-id="${size - 1}"]`);
-  const tailX = parseInt(tail.dataset.col);
-  const tailY = parseInt(tail.dataset.row);
-  const tailOrientation = tail.dataset.orientation;
-  size += 1;
+function createNewTail(currentTail) {
+  const tailX = parseInt(currentTail.dataset.col);
+  const tailY = parseInt(currentTail.dataset.row);
+  const tailOrientation = currentTail.dataset.orientation;
   const newTail = document.createElement("div");
   newTail.classList.add('snake');
   newTail.dataset.id = size - 1;
   newTail.dataset.row = tailY + (-dirY[tailOrientation]);
   newTail.dataset.col = tailX + (-dirX[tailOrientation]);
   newTail.dataset.orientation = tailOrientation;
+  return newTail;
+}
+
+function updateSnakeData() {
+  snakeGroup = [...document.querySelectorAll('.snake')];
+}
+
+function growUp() {
+  const currentTail = document.querySelector(`[data-id="${size - 1}"]`);
+  size += 1;
+  const newTail = createNewTail(currentTail);
   boardLayer.appendChild(newTail);
   fixPosition(newTail);
-  snakeGroup = [...document.querySelectorAll('.snake')];
+  updateSnakeData();
   speed += 0.2;
 }
 
@@ -169,41 +194,48 @@ function manageCollision() {
   console.log("collision!!");
 }
 
-function movesnake() {
-  snakeGroup.forEach((snakeCell) => {
-    const col = snakeCell.dataset.col;
-    const row = snakeCell.dataset.row;
-    if (changeDirPosition[`${col}-${row}`] !== undefined) {
-      snakeCell.dataset.orientation = changeDirPosition[`${col}-${row}`];
-    }
+function detectDirectionChanges(snakeCell) {
+  const col = snakeCell.dataset.col;
+  const row = snakeCell.dataset.row;
+  if (changeDirPosition[`${col}-${row}`] !== undefined) {
+    snakeCell.dataset.orientation = changeDirPosition[`${col}-${row}`];
     if (parseInt(snakeCell.dataset.id) === (size - 1)) { 
       console.log('clean change dir');
       changeDirPosition[`${col}-${row}`] = undefined; 
     }
-    const cellOrientation = snakeCell.dataset.orientation;
-    snakeCell.dataset.col = parseInt(snakeCell.dataset.col) + dirX[cellOrientation];
-    snakeCell.dataset.row = parseInt(snakeCell.dataset.row) + dirY[cellOrientation];
-  });
+  }
+}
 
-  steps += 1;
+function nextPositionSnakeCell(snakeCell) {
+  const cellOrientation = snakeCell.dataset.orientation;
+  snakeCell.dataset.col = parseInt(snakeCell.dataset.col) + dirX[cellOrientation];
+  snakeCell.dataset.row = parseInt(snakeCell.dataset.row) + dirY[cellOrientation];
+}
+
+function checkPhase() {
+  if (!isPhaseComplete()) {
+    growUp();
+  } else {
+    stopGame();
+    newPhase();
+  }
+}
+
+function moveSnake() {
+  snakeGroup.forEach((snakeCell) => {
+    detectDirectionChanges(snakeCell);
+    nextPositionSnakeCell(snakeCell);
+  });
   const x = tailHead.dataset.col;
   const y = tailHead.dataset.row;
   if (collision(x, y)) {
     manageCollision();
   } else {
     if (capture(x, y, apple)) {
-      if (!isPhaseComplete()) {
-        growUp();
-        drawElem(document.querySelector('.apple'));
-      } else {
-        stopGame();
-        newPhase();
-        drawElem(document.querySelector('.apple'));
-      }
+      drawElem(document.querySelector('.apple'));
+      checkPhase();
     }
-    snakeGroup.forEach((snakeCell) => {
-      fixPosition(snakeCell);
-    });
+    fixPositionSnake();
   }
 }
 
@@ -212,7 +244,7 @@ function move() {
   const step = timeBase / speed;
   if (time - lastTime > step) {
     lastTime = time;
-    movesnake();
+    moveSnake();
   }
 }
 
@@ -261,10 +293,8 @@ const tailOrientation = { 'ArrowUp': 'N', 'ArrowDown': 'S', 'ArrowRight': 'E', '
 const notAllowedOrientation = {'N': 'S', 'S': 'N', 'E': 'O', 'O': 'E' };
 let apple;
 let changeDirPosition = {};
-let changeDir = 'clean';
 let initialSize = 3;
 let size = initialSize;
-let steps = 0;
 let points = 0;
 let totalPoints = 0;
 const phasePoints = [0, 5, 10, 15, 20, 30, 40, 50];
