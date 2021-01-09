@@ -210,6 +210,7 @@ function movesnake() {
       } else {
         stopGame();
         newPhase();
+        drawElem(document.querySelector('.apple'));
       }
     }
     snakeGroup.forEach((snakeCell) => {
