@@ -72,12 +72,13 @@ function getExplosionDOMObj() {
 
 function startGame() {
   lastTime = new Date().getTime();
-  moveTic = setInterval(move, 5);
+  //moveTic = setInterval(move, 5);
+  requestAnimationFrame(move);
   modalLayer.hideModal();
 }
 
 function stopGame() {
-  clearInterval(moveTic);
+  gameStopped = true;
 }
 
 function modalToStartGame(message) {
@@ -186,7 +187,7 @@ function collision(x, y) {
 }
 
 function manageCollision() {
-  clearInterval(moveTic);
+  stopGame();
   const explosionObj = getExplosionDOMObj();
   tailHead.appendChild(explosionObj);
   explosionObj.showExplosion();
@@ -246,6 +247,9 @@ function move() {
     lastTime = time;
     moveSnake();
   }
+  if (!gameStopped) {
+    requestAnimationFrame(move);
+  }
 }
 
 function reset() {
@@ -255,6 +259,7 @@ function reset() {
   size = initialSize;
   phase = 1;
   speed = 1;
+  gameStopped = false;
 }
 
 function playAgain(msg) {
@@ -301,6 +306,7 @@ const phasePoints = [0, 5, 10, 15, 20, 30, 40, 50];
 let phase = 1;
 let timeBase = 500; // miliSECONDS
 let lastTime = new Date().getTime();
+let gameStopped = false;
 let speed = 1;
 let moveTic;
 let snakeGroup;
